@@ -1,5 +1,7 @@
 import * as Koa from 'koa';
 import { router } from './route';
+import { dbInit } from './db.init';
+var bodyParser = require('koa-bodyparser');
 
 const app = new Koa();
 
@@ -7,6 +9,8 @@ const app = new Koa();
 //     ctx.body = 'Hello World! I am vecihi.node';
 // });
 
+dbInit();
+app.use(bodyParser());
 app.use(router.routes());
 app.use(router.allowedMethods());
 

@@ -1,8 +1,8 @@
 import * as Router from 'koa-router';
-import { userRouters } from './business/user-controller';
+import { personnelRouters } from './business/personnel-controller';
 
 const router = new Router();
 
-router.use(userRouters);
+router.use(personnelRouters);
 
 export { router };

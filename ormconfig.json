@@ -4,9 +4,13 @@
    "port": 5432,
    "username": "postgres",
    "password": "Qnill123*",
-   "database": "vecihi.node",
+   "database": "repcom",
    "synchronize": false,
-   "logging": false,
+   "logging": [
+      "error",
+      "query",
+      "schema"
+   ],
    "entities": [
       "src/entity/**/*.ts"
    ],
