@@ -4,6 +4,7 @@
    "description": "Emre Durmayaz Graduation Project",
    "main": "server.ts",
    "dependencies": {
+      "firebase": "^5.10.0",
       "koa": "^2.6.2",
       "koa-bodyparser": "^4.2.1",
       "koa-router": "^7.4.0",

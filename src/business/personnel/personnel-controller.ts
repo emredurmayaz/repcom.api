@@ -1,7 +1,7 @@
 import * as Router from 'koa-router';
-import { Personnel } from "../entity/personnel";
+import { Personnel } from "../../entity/personnel";
 import { getManager, createConnection, getConnectionOptions } from "typeorm";
-import { PersonnelType } from '../const/const.enum';
+import { PersonnelType } from '../../const/const.enum';
 import { PersonnelDto } from './personnel-dto';
 
 class PersonnelController {

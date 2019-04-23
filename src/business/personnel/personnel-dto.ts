@@ -1,4 +1,4 @@
-import { PersonnelType } from "../const/const.enum";
+import { PersonnelType } from "../../const/const.enum";
 
 export class PersonnelDto {
 
