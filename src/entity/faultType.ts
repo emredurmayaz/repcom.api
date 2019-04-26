@@ -1,9 +1,8 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
-import { PersonnelType } from "../const/const.enum";
 import { Fault } from "./fault";
 
 @Entity()
-export class Personnel {
+export class FaultType {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -16,14 +15,6 @@ export class Personnel {
   @Column()
   name: string;
 
-  @Column({ nullable: true })
-  externalAuthId: string | null;
-
-  @Column({ type: "char" })
-  type: PersonnelType;
-
-  // FK
-  // Faults
-  @OneToMany(type => Fault, fault => fault.personnel)
+  @OneToMany(type => Fault, fault => fault.faultType)
   faults: Fault[];
 }

@@ -5,8 +5,10 @@
    "main": "server.ts",
    "dependencies": {
       "firebase": "^5.10.0",
+      "firebase-admin": "^7.3.0",
       "koa": "^2.6.2",
       "koa-bodyparser": "^4.2.1",
+      "koa-cors": "0.0.16",
       "koa-router": "^7.4.0",
       "pg": "^7.7.1",
       "reflect-metadata": "^0.1.10",

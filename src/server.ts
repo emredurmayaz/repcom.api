@@ -1,7 +1,8 @@
-import * as Koa from 'koa';
-import { router } from './route';
-import { dbInit } from './db.init';
-var bodyParser = require('koa-bodyparser');
+import * as Koa from "koa";
+import { router } from "./route";
+import { dbInit } from "./db.init";
+var bodyParser = require("koa-bodyparser");
+var cors = require("koa-cors");
 
 const app = new Koa();
 
@@ -11,9 +12,11 @@ const app = new Koa();
 
 dbInit();
 app.use(bodyParser());
+app.use(cors());
+
 app.use(router.routes());
 app.use(router.allowedMethods());
 
 app.listen(3042);
 
-console.log('Server running on port 3042');
+console.log("Server running on port 3042");
