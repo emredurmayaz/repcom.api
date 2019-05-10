@@ -1,5 +1,5 @@
 export class FaultTypeDto {
-  Id: string;
+  Id: number;
   code: string;
   name: string;
   isDeleted: boolean;

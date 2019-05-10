@@ -1,5 +1,6 @@
 import * as Router from "koa-router";
-import { getManager, createConnection, getConnectionOptions } from "typeorm";
+import { getManager } from "typeorm";
+import { FaultType } from "../../entity/faultType";
 import { FaultTypeDto } from "./faultType-dto";
 
 class FaultTypeController {
@@ -9,9 +10,9 @@ class FaultTypeController {
 
     const manager = getManager();
 
-    const entity = manager.create(FaultTypeDto);
+    const entity = manager.create(FaultType);
 
-    manager.merge(FaultTypeDto, entity, dto);
+    manager.merge(FaultType, entity, dto);
 
     await manager.save(entity);
 
@@ -25,8 +26,8 @@ class FaultTypeController {
     const manager = await getManager();
 
     const result = await manager
-      .createQueryBuilder(FaultTypeDto, "faultTy")
-      .where("pers.isDeleted= :isDeleted", { isDeleted: false })
+      .createQueryBuilder(FaultType, "faultTy")
+      .where("faultTy.isDeleted= :isDeleted", { isDeleted: false })
       .select(["faultTy.id", "faultTy.code", "faultTy.name"])
       .getMany();
 
@@ -39,7 +40,7 @@ class FaultTypeController {
 
     const manager = await getManager();
 
-    const faultType = await manager.findOne(FaultTypeDto, id);
+    const faultType = await manager.findOne(FaultType, id);
 
     if (!faultType) {
       ctx.response.status = 400;
@@ -59,7 +60,7 @@ class FaultTypeController {
 
     const manager = await getManager();
 
-    const faultType = await manager.findOne(FaultTypeDto, id);
+    const faultType = await manager.findOne(FaultType, id);
 
     if (!faultType) {
       ctx.response.status = 400;
@@ -82,7 +83,7 @@ class FaultTypeController {
 
     const manager = await getManager();
 
-    const faultType = await manager.findOne(FaultTypeDto, id);
+    const faultType = await manager.findOne(FaultType, id);
 
     if (!faultType) {
       ctx.response.status = 400;

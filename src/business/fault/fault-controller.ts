@@ -1,18 +1,20 @@
 import * as Router from "koa-router";
-import { Machine } from "../../entity/machine";
 import { getManager } from "typeorm";
-import { FaultDto } from "./fault-dto";
+import { FaultAddDto } from "./fault-dto";
+import { Fault } from "../../entity/fault";
 
 class FaultController {
   public async save(ctx: any, next: any) {
-    const dto = new FaultDto();
+    const dto = new FaultAddDto();
     Object.assign(dto, ctx.request.body);
 
     const manager = getManager();
 
-    const entity = manager.create(FaultDto);
+    const entity = manager.create(Fault);
 
-    manager.merge(FaultDto, entity, dto);
+    manager.merge(Fault, entity, dto);
+
+    entity.date = new Date();
 
     await manager.save(entity);
 
@@ -26,9 +28,38 @@ class FaultController {
     const manager = await getManager();
 
     const result = await manager
-      .createQueryBuilder(FaultDto, "fault")
-      .where("pers.isDeleted= :isDeleted", { isDeleted: false })
-      .select(["mach.id", "mach.date", "mach.priority"])
+      .createQueryBuilder(Fault, "fault")
+      .innerJoinAndSelect(
+        "fault.machine",
+        "machine",
+        "machine.isDeleted = :isDeleted",
+        { isDeleted: false }
+      )
+      .innerJoinAndSelect("fault.faultType", "faultType")
+      .innerJoinAndSelect("fault.personnel", "personnel")
+      .where("fault.isDeleted= :isDeleted", { isDeleted: false })
+      .orderBy("fault.date", "DESC")
+      .getMany();
+
+    ctx.body = result;
+    await next();
+  }
+
+  public async getLastFaults(ctx: any, next: any) {
+    const manager = await getManager();
+
+    const result = await manager
+      .createQueryBuilder(Fault, "fault")
+      .innerJoinAndSelect(
+        "fault.machine",
+        "machine",
+        "machine.isDeleted = :isDeleted",
+        { isDeleted: false }
+      )
+      .innerJoinAndSelect("fault.faultType", "faultType")
+      .innerJoinAndSelect("fault.personnel", "personnel")
+      .where("fault.isDeleted = true")
+      .orderBy("fault.date", "DESC")
       .getMany();
 
     ctx.body = result;
@@ -40,7 +71,7 @@ class FaultController {
 
     const manager = await getManager();
 
-    const fault = await manager.findOne(FaultDto, id);
+    const fault = await manager.findOne(FaultAddDto, id);
 
     if (!fault) {
       ctx.response.status = 400;
@@ -54,13 +85,12 @@ class FaultController {
     await next();
   }
 
-  public async update(ctx: any, next: any) {
-    const id = ctx.query.id;
-    const body = ctx.request.body;
+  public async delete(ctx: any, next: any) {
+    const id = ctx.request.body.id;
 
     const manager = await getManager();
 
-    const fault = await manager.findOne(FaultDto, id);
+    const fault = await manager.findOne(Fault, id);
 
     if (!fault) {
       ctx.response.status = 400;
@@ -69,33 +99,11 @@ class FaultController {
       return;
     }
 
-    fault.name = body.name;
+    fault.isDeleted = true;
 
+    ctx.response.status = 200;
+    ctx.body = "Ok";
     await manager.save(fault);
-
-    ctx.response.status = 200;
-    ctx.body = "Ok";
-    await next();
-  }
-  public async delete(ctx: any, next: any) {
-    const id = ctx.query.id;
-
-    const manager = await getManager();
-
-    const machine = await manager.findOne(Machine, id);
-
-    if (!machine) {
-      ctx.response.status = 400;
-      ctx.body = "Kayıt Bulunamadı";
-
-      return;
-    }
-
-    machine.isDeleted = true;
-
-    ctx.response.status = 200;
-    ctx.body = "Ok";
-    await manager.save(machine);
 
     await next();
   }
@@ -108,8 +116,8 @@ const routePrefix = "/api/fault/";
 
 router.post(routePrefix + "save", cntr.save);
 router.get(routePrefix + "get", cntr.get);
-router.put(routePrefix + "update", cntr.update);
-router.delete(routePrefix + "delete", cntr.delete);
+router.get(routePrefix + "getLastFaults", cntr.getLastFaults);
+router.put(routePrefix + "delete", cntr.delete);
 
 const faultRouters = router.routes();
 export { faultRouters };

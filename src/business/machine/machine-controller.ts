@@ -27,8 +27,9 @@ class MachineController {
 
     const result = await manager
       .createQueryBuilder(Machine, "mach")
-      .where("pers.isDeleted= :isDeleted", { isDeleted: false })
+      .where("mach.isDeleted= :isDeleted", { isDeleted: false })
       .select(["mach.id", "mach.code", "mach.name"])
+      .orderBy("mach.name")
       .getMany();
 
     ctx.body = result;

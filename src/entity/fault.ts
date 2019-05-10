@@ -15,26 +15,26 @@ export class Fault {
   date: Date;
 
   @Column({ type: "smallint", default: 0 })
-  priorty: number;
+  priority: number;
 
   // FK
   // Machine
-  @Column("uuid")
-  machineId: string;
+  @Column()
+  machineId: number;
 
   @ManyToOne(type => Machine, machine => machine.faults)
   machine: Machine;
 
   //Fault Type
-  @Column("uuid")
-  faultTypeId: string;
+  @Column()
+  faultTypeId: number;
 
   @ManyToOne(type => FaultType, faultType => faultType.faults)
   faultType: FaultType;
 
   //Personnel
-  @Column("uuid")
-  personnelId: string;
+  @Column()
+  personnelId: number;
 
   @ManyToOne(type => Personnel, personnel => personnel.faults)
   personnel: Personnel;

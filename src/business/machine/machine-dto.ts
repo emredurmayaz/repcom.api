@@ -1,5 +1,5 @@
 export class MachineDto {
-  Id: string;
+  Id: number;
   code: string;
   name: string;
 }

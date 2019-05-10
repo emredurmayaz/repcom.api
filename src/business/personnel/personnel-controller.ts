@@ -32,12 +32,18 @@ class PersonnelController {
       return;
     }
 
-    const firebasePersonnel = await firebase
-      .auth()
-      .createUserWithEmailAndPassword(email, password);
+    try {
+      const firebasePersonnel = await firebase
+        .auth()
+        .createUserWithEmailAndPassword(email, password);
 
-    if (firebasePersonnel) {
-      entity.externalAuthId = firebasePersonnel.user.uid;
+      if (firebasePersonnel) {
+        entity.externalAuthId = firebasePersonnel.user.uid;
+      }
+    } catch (error) {
+      ctx.status = 400;
+      ctx.body = new ApiResult(null, error.message);
+      return;
     }
 
     await manager.save(entity);

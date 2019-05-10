@@ -17,21 +17,35 @@ firebase.initializeApp(clientConfig);
 async function authLogin(ctx: any, next: any) {
   const body = ctx.request.body;
 
-  const username = body.username;
+  const email = body.email;
   const password = body.password;
 
-  if (username === "" || password === "") {
+  if (email === "" || password === "") {
     return (ctx.status = 400);
   }
 
   const firebaseUser = (await firebase
     .auth()
-    .signInWithEmailAndPassword(username, password)).user;
+    .signInWithEmailAndPassword(email, password)).user;
 
   const token = await firebaseUser.getIdToken(true);
+  //TOKEN DA PERSONEL ID DÖNÜLECEK
+
+  const authUserId = await firebaseUser.uid;
+  const manager = await getManager();
+
+  const personnel = await manager
+    .createQueryBuilder(Personnel, "personnel")
+    .where("personnel.isDeleted = :isDeleted", { isDeleted: false })
+    .andWhere("personnel.externalAuthId = :authId", { authId: authUserId })
+    .select(["personnel.id", "personnel.name", "personnel.type"])
+    .getOne();
 
   ctx.body = {
-    token: token
+    token: token,
+    personnelId: personnel.id,
+    personnelName: personnel.name,
+    personnelType: personnel.type
   };
   // ctx.status=200;
 }
