@@ -87,6 +87,7 @@ class FaultController {
 
   public async delete(ctx: any, next: any) {
     const id = ctx.request.body.id;
+    const personnelId = ctx.request.body.personnelId;
 
     const manager = await getManager();
 
@@ -100,6 +101,8 @@ class FaultController {
     }
 
     fault.isDeleted = true;
+    fault.personnelId = personnelId;
+    fault.date = new Date();
 
     ctx.response.status = 200;
     ctx.body = "Ok";
