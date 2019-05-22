@@ -112,7 +112,7 @@ class PersonnelController {
   }
 
   public async delete(ctx: any, next: any) {
-    const id = ctx.query.id;
+    const id = ctx.request.body.id;
 
     const manager = await getManager();
 
@@ -143,7 +143,7 @@ const routePrefix = "/api/personnel/";
 router.post(routePrefix + "save", cntr.save);
 router.get(routePrefix + "get", cntr.get);
 router.put(routePrefix + "update", cntr.update);
-router.delete(routePrefix + "delete", cntr.delete);
+router.put(routePrefix + "delete", cntr.delete);
 
 const personnelRouters = router.routes();
 export { personnelRouters };

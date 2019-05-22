@@ -2,6 +2,7 @@ import * as Router from "koa-router";
 import * as firebase from "firebase";
 import { getManager } from "typeorm";
 import { Personnel } from "../../entity/personnel";
+import { ApiResult } from "../../const/APIResult";
 
 const router = new Router();
 
@@ -24,30 +25,37 @@ async function authLogin(ctx: any, next: any) {
     return (ctx.status = 400);
   }
 
-  const firebaseUser = (await firebase
-    .auth()
-    .signInWithEmailAndPassword(email, password)).user;
+  try {
+    const firebaseUser = (await firebase
+      .auth()
+      .signInWithEmailAndPassword(email, password)).user;
 
-  const token = await firebaseUser.getIdToken(true);
-  //TOKEN DA PERSONEL ID DÖNÜLECEK
+    const token = await firebaseUser.getIdToken(true);
+    //TOKEN DA PERSONEL ID DÖNÜLECEK
 
-  const authUserId = await firebaseUser.uid;
-  const manager = await getManager();
+    const authUserId = await firebaseUser.uid;
+    const manager = await getManager();
 
-  const personnel = await manager
-    .createQueryBuilder(Personnel, "personnel")
-    .where("personnel.isDeleted = :isDeleted", { isDeleted: false })
-    .andWhere("personnel.externalAuthId = :authId", { authId: authUserId })
-    .select(["personnel.id", "personnel.name", "personnel.type"])
-    .getOne();
+    const personnel = await manager
+      .createQueryBuilder(Personnel, "personnel")
+      .where("personnel.isDeleted = :isDeleted", { isDeleted: false })
+      .andWhere("personnel.externalAuthId = :authId", { authId: authUserId })
+      .select(["personnel.id", "personnel.name", "personnel.type"])
+      .getOne();
 
-  ctx.body = {
-    token: token,
-    personnelId: personnel.id,
-    personnelName: personnel.name,
-    personnelType: personnel.type
-  };
-  // ctx.status=200;
+    ctx.body = {
+      token: token,
+      personnelId: personnel.id,
+      personnelName: personnel.name,
+      personnelType: personnel.type
+    };
+  } catch (error) {
+    ctx.status = 400;
+    ctx.body = new ApiResult(null, error.message);
+    return;
+  }
+
+  ctx.status = 200;
 }
 
 async function register(ctx: any, next: any) {
@@ -66,32 +74,40 @@ async function register(ctx: any, next: any) {
     return (ctx.status = 400);
   }
 
-  let query = await manager
-    .createQueryBuilder(Personnel, "pers")
-    .where("pers.isDeleted= false")
-    .andWhere("lower(pers.email)=lower('" + email + "')")
-    .getQuery();
+  // let query = await manager
+  //   .createQueryBuilder(Personnel, "pers")
+  //   .where("pers.isDeleted= false")
+  //   .andWhere("lower(pers.email)=lower('" + email + "')")
+  //   .getQuery();
 
-  query = "select Exists (" + query + ")";
-  const checkPersonnel = (await manager.query(query))[0].exists;
+  // query = "select Exists (" + query + ")";
+  // const checkPersonnel = (await manager.query(query))[0].exists;
 
-  if (checkPersonnel) {
-    return (ctx.status = 400);
-  }
+  // if (checkPersonnel) {
+  //   return (ctx.status = 400);
+  // }
 
   const personnel = manager.create(Personnel);
-  manager.merge(Personnel, personnel);
+  manager.merge(Personnel, personnel, ctx.request.body);
 
-  const firebaseUser = (await firebase
-    .auth()
-    .signInWithEmailAndPassword(email, password)).user;
+  try {
+    const firebasePersonnel = await firebase
+      .auth()
+      .createUserWithEmailAndPassword(email, password);
 
-  const token = await firebaseUser.getIdToken(true);
+    if (firebasePersonnel) {
+      personnel.externalAuthId = firebasePersonnel.user.uid;
+    }
+  } catch (error) {
+    ctx.status = 400;
+    ctx.body = new ApiResult(null, error.message);
+    return;
+  }
 
-  ctx.body = {
-    token: token
-  };
-  // ctx.status=200;
+  await manager.save(personnel);
+
+  ctx.response.status = 200;
+  ctx.body = new ApiResult(personnel.id, "Ok");
 }
 
 const authRouters = router.routes();
